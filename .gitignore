@@ -28,3 +28,4 @@ dist
 config
 views/config.json
 public/upload
+config/production.json
