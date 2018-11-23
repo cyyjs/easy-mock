@@ -7,7 +7,6 @@
       :nav="nav"
       v-model="pageName">
     </em-header>
-    <editor v-model="editor"></editor>
     <div v-shortkey="['tab']" @shortkey="handleKeyTab()"></div>
     <em-keyboard-short v-model="keyboards"></em-keyboard-short>
     <Back-top>
@@ -88,7 +87,6 @@ import Clipboard from 'clipboard'
 import debounce from 'lodash/debounce'
 
 import * as api from '../../api'
-import Editor from './editor'
 import Project from '../new/project'
 import MockExpand from './mock-expand'
 
@@ -103,9 +101,6 @@ export default {
         { title: this.$t('p.detail.nav[0]'), icon: 'android-list' },
         { title: this.$t('p.detail.nav[1]'), icon: 'gear-a' }
       ],
-      editor: {
-        show: false
-      },
       keyboards: [
         {
           category: this.$t('p.detail.keyboards[0].category'),
@@ -279,7 +274,20 @@ export default {
             data: { id: this.project._id }
           }).then((res) => {
             if (res.data.success) {
-              this.$Message.success(this.$t('p.detail.syncSwagger.success'))
+              const syncErrorURLs = res.data.data.syncErrorURLs
+              if (syncErrorURLs.length) {
+                this.$Notice.success({
+                  title: this.$t('p.detail.syncSwagger.syncResult'),
+                  desc: this.$t('p.detail.syncSwagger.success')
+                })
+                this.$Notice.warning({
+                  title: this.$t('p.detail.syncSwagger.syncFailed.title'),
+                  duration: 0,
+                  desc: `${syncErrorURLs.join(', ')} ${this.$t('p.detail.syncSwagger.syncFailed.desc')}`
+                })
+              } else {
+                this.$Message.success(this.$t('p.detail.syncSwagger.success'))
+              }
               this.$store.commit('mock/SET_REQUEST_PARAMS', {pageIndex: 1})
               this.$store.dispatch('mock/FETCH', this.$route)
             }
@@ -323,13 +331,16 @@ export default {
       })
     },
     openEditor (mock) {
-      this.editor = mock || {}
-      this.$set(this.editor, 'show', true)
+      if (mock) {
+        this.$store.commit('mock/SET_EDITOR_DATA', {mock, baseUrl: this.baseUrl})
+        this.$router.push(`/editor/${this.project._id}/${mock._id}`)
+      } else {
+        this.$router.push(`/editor/${this.project._id}`)
+      }
     }
   },
   components: {
-    Project,
-    Editor
+    Project
   }
 }
 </script>

@@ -1,0 +1,17 @@
+{
+    "apps": [
+        {
+            "name": "mock",
+            "script": "app.js",
+            "cwd": "/workspace/app/easy-mock",
+            "exec_mode": "fork",
+            "max_memory_restart": "1G",
+            "autorestart": true,
+            "node_args": [],
+            "args": [],
+            "env": {
+                "NODE_ENV": "production"
+            }
+        }
+    ]
+}
